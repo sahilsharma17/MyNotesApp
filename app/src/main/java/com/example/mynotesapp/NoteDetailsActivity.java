@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -13,7 +14,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 
-import org.w3c.dom.Text;
 
 public class NoteDetailsActivity extends AppCompatActivity {
 
@@ -22,6 +22,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
     TextView pageTitleTextView;
     String title,content,docId;
     boolean isEditMode = false;
+    TextView deleteNoteTextViewBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class NoteDetailsActivity extends AppCompatActivity {
         contentEditText = findViewById(R.id.notes_content_text);
         saveNoteBtn = findViewById(R.id.save_note_btn);
         pageTitleTextView = findViewById(R.id.page_title);
+        deleteNoteTextViewBtn = findViewById(R.id.delete_note_text_view_btn);
 
         //recieve data
         title = getIntent().getStringExtra("title");
@@ -47,9 +49,12 @@ public class NoteDetailsActivity extends AppCompatActivity {
 
         if(isEditMode){
             pageTitleTextView.setText("Edit Your Note" );
+            deleteNoteTextViewBtn.setVisibility(View.VISIBLE);
         }
 
         saveNoteBtn.setOnClickListener( v-> saveNote());
+
+        deleteNoteTextViewBtn.setOnClickListener((v)-> deleteNoteFromForebase());
     }
 
     void saveNote(){
@@ -88,6 +93,26 @@ public class NoteDetailsActivity extends AppCompatActivity {
                 }else{
                     //note is not added
                     Utility.showToast(NoteDetailsActivity.this,"Failed while adding note");
+                }
+            }
+        });
+    }
+
+    void deleteNoteFromForebase(){
+        DocumentReference docRef;
+            docRef = Utility.getCollectionRefForNotes().document(docId);
+
+
+        docRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+                    //note is deleted
+                    Utility.showToast(NoteDetailsActivity.this,"Note deleted sucessfully");
+                    finish();
+                }else{
+                    //note is not deleted
+                    Utility.showToast(NoteDetailsActivity.this,"Failed while deleting note");
                 }
             }
         });

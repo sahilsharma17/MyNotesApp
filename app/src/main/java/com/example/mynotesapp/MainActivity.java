@@ -7,10 +7,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.Query;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +38,21 @@ public class MainActivity extends AppCompatActivity {
         setUpRecyclerView();
     }
     void showMenu(){
-        //TODO Display menu
+        PopupMenu popupMenu = new PopupMenu(MainActivity.this,menuBtn);
+        popupMenu.getMenu().add("Logout");
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if(menuItem.getTitle()=="Logout"){
+                    FirebaseAuth.getInstance().signOut();
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    finish();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
     void setUpRecyclerView(){
         Query query = Utility.getCollectionRefForNotes().orderBy("timestamp",Query.Direction.DESCENDING);
